@@ -1,6 +1,12 @@
 const Post = () => {
+
+    const date = "some date from db"
+    const category = "swimming"
+    
     return ( 
-        <div></div>
+        <div>
+
+        </div>
      );
 }
  

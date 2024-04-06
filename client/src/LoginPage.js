@@ -1,50 +1,57 @@
 import { useState } from "react";
 import CryptoJS from "crypto-js";
+import axios from "axios";
+import useAuth from './hooks/useAuth';
+
+const API = axios.create({
+    baseURL: "http://localhost:5000",
+    withCredentials: true,
+  });
 
 const Login = () => {
-    const [username,setUsername] = useState("")
-    const [password, setPassword] = useState("")
+    console.log("login")
 
-    const handleLogin = () => {
-        console.log("login")
-        // axios.post()
-    //     fetch("http://localhost:5000/login", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         },
-    //         body: JSON.stringify({ email, hashedPassword })
-    //     })
-    //         .then(res => {
-    //             if (res.ok) {
-    //                 return res.json()
-    //             } else {
-    //                 return res.json().then((data) => {
-    //                     console.log(data.msg)
-    //                 })
-    //             }
-    //         })
-    //         .then(data => {
-    //             console.log(data.token);
-    //             localStorage.setItem("jwtToken", data.token);
-    //             setLoggedIn(true)
-    //             navigate("/")
-    //         })
-    //         .catch(e => {
-    //             console.log('Login error:', e)
-    //         })
-    // }
+    const [username,setUsername] = useState('');
+    const [password,setPassword] = useState('');
+    const [error, setError] = useState('');
+    const {auth, setAuth} = useAuth();
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await API.post("/login", {
+            username,
+            password,
+            }).then((res) => {
+            if (res.data === 202) {
+                setAuth(true);
+                setUsername("");
+                setPassword("");
+                console.log("You are logged in")
+            } else {
+                console.log("incorrect submission");
+                setError(res.message);
+            }
+            });
+        } catch (err) {
+            if (!err?.response) {
+            setError("no server response");
+            } else {
+            setError("authentication failed");
+            }
+        }
     }
+
     return ( 
         <div className="login-form">
             <h1>LOGIN</h1>
             <input className="login-input" type="text" name="username" placeholder="username" onChange={e => setUsername(e.target.value)}/>
             <input className="login-input" type="password" name="hashedPassword" placeholder="password" onChange={e => setPassword(CryptoJS.SHA256(e.target.value).toString())} />
             <button className="log-btn signin" onClick={handleLogin}>SIGN IN</button>
-            {username}
-            {password}
+            {auth && <p>You are logged in</p>}
         </div>
      );
+
 }
  
 export default Login;
