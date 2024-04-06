@@ -1,4 +1,5 @@
 {
+  
   "name": "client",
   "version": "0.1.0",
   "private": true,
@@ -27,6 +28,7 @@
       "react-app/jest"
     ]
   },
+  "proxy": "https://weeking.shuttleapp.rs",
   "browserslist": {
     "production": [
       ">0.2%",

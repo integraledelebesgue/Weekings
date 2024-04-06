@@ -4,7 +4,7 @@ import axios from "axios";
 import useAuth from './hooks/useAuth';
 
 const API = axios.create({
-    baseURL: "http://localhost:5000",
+    baseURL: "https://weeking.shuttleapp.rs",
     withCredentials: true,
   });
 
