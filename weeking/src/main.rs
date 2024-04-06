@@ -83,6 +83,7 @@ async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send +
                         .allow_any_origin()
                         .allow_any_method()
                         .allow_any_header()
+                        .supports_credentials()
                 )
                 .wrap(middleware::NormalizePath::trim())
                 .wrap(middleware::Logger::default()),
