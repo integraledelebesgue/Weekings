@@ -6,7 +6,7 @@ pub struct Group {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub users: Vec<ObjectId>,
-    pub hobbies: Vec<ObjectId>,
+    pub categories: Vec<ObjectId>,
     pub quests: Vec<ObjectId>,
     pub posts: Vec<ObjectId>,
 }

@@ -17,23 +17,24 @@ const FIVE_MINUTES: Duration = Duration::minutes(5);
 
 #[get("/")]
 async fn index(identity: Option<Identity>) -> actix_web::Result<impl Responder> {
-    println!("In index:\n{}", identity.is_some());
-
     let id = match identity.map(|id| id.id()) {
         None => "anonymous".to_owned(),
         Some(Ok(id)) => id,
         Some(Err(err)) => return Err(error::ErrorInternalServerError(err)),
     };
 
-    println!("\n{id}\n");
-
     Ok(format!("Hello {id}"))
 }
 
 #[get("/login")]
 async fn login(req: HttpRequest) -> impl Responder {
-    Identity::login(&req.extensions(), "user1".to_owned()).unwrap();
+    Identity::login(&req.extensions(), "username_goes_here".to_owned()).unwrap();
     web::Redirect::to("/").using_status_code(StatusCode::ACCEPTED)
+}
+
+#[get("/feed")]
+async fn feed() -> impl Responder {
+    "Feed here"
 }
 
 #[get("/logout")]

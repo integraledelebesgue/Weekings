@@ -15,6 +15,6 @@ pub struct Response {
 
 impl Response {
     fn from(user: ObjectId) -> mongodb::error::Result<Self> {
-
+        todo!()
     }
 }

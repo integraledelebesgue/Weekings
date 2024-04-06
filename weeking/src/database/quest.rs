@@ -2,6 +2,7 @@ use mongodb::bson::DateTime;
 use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub enum Status {
     Completed,
     Failed,
