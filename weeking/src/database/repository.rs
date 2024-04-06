@@ -3,6 +3,8 @@ use std::fmt::{Debug, Formatter};
 use dotenv::dotenv;
 use mongodb::{Client, Collection};
 use derive_error::Error;
+use mongodb::bson::oid::ObjectId;
+use crate::database::post::Post;
 
 use super::user::User;
 
@@ -49,27 +51,43 @@ impl Repository {
         Ok(Repository { users })
     }
 
-    pub async fn add_user() {
+    pub async fn get_user() -> Option<User> {
         todo!()
     }
 
-    pub async fn delete_user() {
+    pub async fn add_user() -> mongodb::error::Result<()> {
         todo!()
     }
 
-    pub async fn make_friends() {
+    pub async fn delete_user() -> mongodb::error::Result<()> {
         todo!()
     }
 
-    pub async fn delete_friends() {
+    pub async fn get_friends(user: ObjectId) -> Option<ObjectId> {
         todo!()
     }
 
-    pub async fn post() {
+    pub async fn make_friends() -> mongodb::error::Result<()> {
         todo!()
     }
 
-    pub async fn delete_post() {
+    pub async fn delete_friends() -> mongodb::error::Result<()> {
+        todo!()
+    }
+
+    pub async fn get_posts() -> mongodb::error::Result<()> {
+        todo!()
+    }
+
+    pub async fn add_post() -> mongodb::error::Result<()> {
+        todo!()
+    }
+
+    pub async fn delete_post() -> mongodb::error::Result<()> {
+        todo!()
+    }
+
+    pub async fn post() -> mongodb::error::Result<()> {
         todo!()
     }
 

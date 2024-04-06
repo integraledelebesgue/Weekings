@@ -1,4 +1,4 @@
-mod database;
+
 
 use std::convert::identity;
 use actix_identity::{Identity, IdentityMiddleware};
@@ -11,7 +11,7 @@ use actix_web::{
 };
 use actix_web::{get, web::ServiceConfig};
 use shuttle_actix_web::ShuttleActixWeb;
-use crate::database::repository::Repository;
+use weeking::database::repository::Repository;
 
 const FIVE_MINUTES: Duration = Duration::minutes(5);
 
@@ -30,18 +30,10 @@ async fn index(identity: Option<Identity>) -> actix_web::Result<impl Responder> 
     Ok(format!("Hello {id}"))
 }
 
-#[get("/")]
-async fn simple_index() -> actix_web::Result<impl Responder>{
-    dbg!("Wtf XD");
-    Ok("Siema siema kurwa witam")
-}
-
 #[get("/login")]
 async fn login(req: HttpRequest) -> impl Responder {
-    dbg!(&req);
     Identity::login(&req.extensions(), "user1".to_owned()).unwrap();
-
-    web::Redirect::to("/").using_status_code(StatusCode::FOUND)
+    web::Redirect::to("/").using_status_code(StatusCode::ACCEPTED)
 }
 
 #[get("/logout")]
@@ -60,8 +52,7 @@ async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send +
 
     let config = move |cfg: &mut ServiceConfig| {
         cfg.service(
-            web::scope("/")
-                .service(simple_index)
+            web::scope("")
                 .service(index)
                 .service(login)
                 .service(logout)
