@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use actix_cors::Cors;
 use actix_identity::{Identity, IdentityMiddleware};
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
@@ -76,6 +77,12 @@ async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send +
                         .cookie_secure(false)
                         .session_lifecycle(PersistentSession::default().session_ttl(FIVE_MINUTES))
                         .build(),
+                )
+                .wrap(
+                    Cors::default()
+                        .allow_any_origin()
+                        .allow_any_method()
+                        .allow_any_header()
                 )
                 .wrap(middleware::NormalizePath::trim())
                 .wrap(middleware::Logger::default()),
