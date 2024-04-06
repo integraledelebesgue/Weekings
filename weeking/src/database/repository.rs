@@ -51,6 +51,10 @@ impl Repository {
         Ok(Repository { users })
     }
 
+    pub async fn check_user_data(&self, name: &str, password: &str) -> mongodb::error::Result<()> {
+        Ok(())
+    }
+
     pub async fn get_user() -> Option<User> {
         todo!()
     }

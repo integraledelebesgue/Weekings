@@ -1,6 +1,4 @@
-
-
-use std::convert::identity;
+use std::sync::Arc;
 use actix_identity::{Identity, IdentityMiddleware};
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{
@@ -10,7 +8,9 @@ use actix_web::{
     middleware, web, HttpMessage as _, HttpRequest, Responder,
 };
 use actix_web::{get, web::ServiceConfig};
+use serde::Deserialize;
 use shuttle_actix_web::ShuttleActixWeb;
+use tokio::sync::Mutex;
 use weeking::database::repository::Repository;
 
 const FIVE_MINUTES: Duration = Duration::minutes(5);
@@ -26,10 +26,23 @@ async fn index(identity: Option<Identity>) -> actix_web::Result<impl Responder> 
     Ok(format!("Hello {id}"))
 }
 
+#[derive(Deserialize)]
+struct Login {
+    username: String,
+    password: String
+}
+
 #[get("/login")]
-async fn login(req: HttpRequest) -> impl Responder {
-    Identity::login(&req.extensions(), "username_goes_here".to_owned()).unwrap();
-    web::Redirect::to("/").using_status_code(StatusCode::ACCEPTED)
+async fn login(form: web::Json<Login>, state: web::Data<Mutex<Repository>>, req: HttpRequest) -> impl Responder {
+    let Login { username, password } = form.into_inner();
+
+    match state.lock().await.check_user_data(&username, &password).await {
+        Ok(_) => {
+            Identity::login(&req.extensions(), username).unwrap();
+            web::Redirect::to("/").using_status_code(StatusCode::ACCEPTED)
+        },
+        Err(_) => web::Redirect::to("/").using_status_code(StatusCode::UNAUTHORIZED)
+    }
 }
 
 #[get("/feed")]
@@ -46,8 +59,7 @@ async fn logout(id: Identity) -> impl Responder {
 
 #[shuttle_runtime::main]
 async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send + Clone + 'static> {
-    let repo = Repository::init().await.expect("Db db db");
-    dbg!(&repo);
+    let repo = Arc::new(Mutex::new(Repository::init().await.expect("Db db db")));
 
     let secret_key = Key::generate();
 
@@ -67,7 +79,8 @@ async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send +
                 )
                 .wrap(middleware::NormalizePath::trim())
                 .wrap(middleware::Logger::default()),
-        );
+        )
+            .app_data(repo.clone());
     };
 
     Ok(config.into())
