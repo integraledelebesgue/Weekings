@@ -1,12 +1,19 @@
+use std::fmt::{Display, Formatter};
 use mongodb::bson::DateTime;
 use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug,  Serialize, Deserialize)]
 pub enum Status {
     Completed,
     Failed,
     InProgress
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:}", self)
+    }
 }
 
 #[derive(Serialize, Deserialize)]

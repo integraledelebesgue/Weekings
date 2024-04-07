@@ -10,4 +10,4 @@ pub mod group;
 pub mod post;
 pub mod badge;
 pub mod post_list;
-mod category_list;
+pub mod category_list;

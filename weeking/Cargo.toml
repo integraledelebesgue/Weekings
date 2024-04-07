@@ -8,8 +8,10 @@ actix-cors = "0.7.0"
 actix-identity = "0.6.0"
 actix-session = { version = "0.8.0", features = ["cookie-session"] }
 actix-web = "4.3.1"
+bson = "2.10.0"
 derive-error = "0.0.5"
 dotenv = "0.15.0"
+futures = "0.3.30"
 mongodb = "2.8.2"
 serde = { version = "1.0.197", features = ["derive"] }
 shuttle-actix-web = "0.43.0"

@@ -1,20 +1,26 @@
+use std::convert::identity;
+use std::io;
 use std::sync::Arc;
 use actix_cors::Cors;
 use actix_identity::{Identity, IdentityMiddleware};
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
-use actix_web::{
-    cookie::{time::Duration, Key},
-    error,
-    http::StatusCode,
-    middleware, web, HttpMessage as _, HttpRequest, Responder,
-};
+use actix_web::{cookie::{time::Duration, Key}, error, http::StatusCode, middleware, web, HttpMessage as _, HttpRequest, Responder, post};
 use actix_web::{get, web::ServiceConfig};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use shuttle_actix_web::ShuttleActixWeb;
 use tokio::sync::Mutex;
 use weeking::database::repository::Repository;
+use weeking::routes;
+use weeking::state::State;
+use derive_error::Error;
 
 const FIVE_MINUTES: Duration = Duration::minutes(5);
+
+#[derive(Debug, Error, Serialize, Deserialize)]
+enum Error {
+    UnauthorizedUser,
+    InternalServerError
+}
 
 #[get("/")]
 async fn index(identity: Option<Identity>) -> actix_web::Result<impl Responder> {
@@ -27,40 +33,102 @@ async fn index(identity: Option<Identity>) -> actix_web::Result<impl Responder> 
     Ok(format!("Hello {id}"))
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct Login {
     username: String,
     password: String
 }
 
-#[get("/login")]
-async fn login(form: web::Json<Login>, state: web::Data<Mutex<Repository>>, req: HttpRequest) -> impl Responder {
-    let Login { username, password } = form.into_inner();
+#[post("/login")]
+async fn login(payload: web::Json<Login>, req: HttpRequest, state: web::Data<Mutex<State>>) -> impl Responder {
+    let Login { username, password } = payload.into_inner();
 
-    match state.lock().await.check_user_data(&username, &password).await {
+    let validation = state
+        .lock()
+        .await
+        .repository
+        .check_user_data(&username, &password)
+        .await;
+
+    match validation {
+        Ok(None) | Err(_) => {
+            web::Redirect::to("/").using_status_code(StatusCode::UNAUTHORIZED)
+        },
         Ok(_) => {
             Identity::login(&req.extensions(), username).unwrap();
             web::Redirect::to("/").using_status_code(StatusCode::ACCEPTED)
-        },
-        Err(_) => web::Redirect::to("/").using_status_code(StatusCode::UNAUTHORIZED)
+        }
     }
 }
 
 #[get("/feed")]
-async fn feed() -> impl Responder {
-    "Feed here"
+async fn feed(identity: Option<Identity>, state: web::Data<Mutex<State>>) -> impl Responder {
+    if identity.is_none() {
+        return web::Json(Err(Error::InternalServerError));
+    }
+
+    let session_id = identity
+        .unwrap()
+        .id()
+        .unwrap();
+
+    let id = *state
+        .lock()
+        .await
+        .users.get(&session_id)
+        .unwrap();
+
+    web::Json(Ok(()))
+}
+
+#[get("/groups")]
+async fn all_groups(identity: Option<Identity>, state: web::Data<Mutex<State>>) -> impl Responder {
+    if identity.is_none() {
+        return web::Json(Err(Error::UnauthorizedUser));
+    }
+
+    let session_id = identity
+        .unwrap()
+        .id()
+        .unwrap();
+
+    let id = *state
+        .lock()
+        .await
+        .users.get(&session_id)
+        .unwrap();
+
+    web::Json(
+        routes::groups::Response::from(
+            state.clone(),
+            id
+        ).await.map_err(
+            |reason| Error::InternalServerError
+        )
+    )
 }
 
 #[get("/logout")]
-async fn logout(id: Identity) -> impl Responder {
+async fn logout(id: Identity, state: web::Data<Mutex<State>>) -> impl Responder {
+    let session_id = id
+        .id()
+        .unwrap();
+
     id.logout();
+
+    let users = &mut state.lock().await.users;
+    users.remove(&session_id);
 
     web::Redirect::to("/").using_status_code(StatusCode::FOUND)
 }
 
 #[shuttle_runtime::main]
 async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send + Clone + 'static> {
-    let repo = Arc::new(Mutex::new(Repository::init().await.expect("Db db db")));
+    let repo = Repository::init()
+        .await
+        .expect("Database connection failed");
+
+    let state = web::Data::new(Mutex::new(State::new(repo)));
 
     let secret_key = Key::generate();
 
@@ -88,7 +156,7 @@ async fn actix_web() -> ShuttleActixWeb<impl FnOnce(&mut ServiceConfig) + Send +
                 .wrap(middleware::NormalizePath::trim())
                 .wrap(middleware::Logger::default()),
         )
-            .app_data(repo.clone());
+            .app_data(state.clone());
     };
 
     Ok(config.into())
