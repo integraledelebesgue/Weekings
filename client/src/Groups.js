@@ -1,18 +1,25 @@
-// component for displaying list of Groups
+import API from "./api";
+import useFetch from "./hooks/useFetch";
+import { useNavigate } from "react-router-dom";
 
-// TODO:
-// fetching groups from DB
-//
 const Groups = () => {
 
-    const groups = [1,2,3,4,5,6]
+    const {data: groups, isPending, error} = useFetch(API,"/groups")
+    const navigate = useNavigate();
+
+    const handleGoToGroup = (id) => {
+        navigate(`/groups/${id}`);
+    }
     return (
-        <div>
-            <h1>Hello</h1> 
-        {groups.map(group => {
-            console.log(group);
-            <div>group
-            <p>hello</p></div>
+        <div className="groups-container">
+            <h1>Your groups</h1>
+        {error && <h2>Couldn't fetch info</h2>}
+        {isPending && <p>loading...</p>} 
+        {groups && groups.map(group => {
+            <div className="group" key={group.id}>
+                <h3>{group.name}</h3>
+                <button onClick={e => {handleGoToGroup(group.id)}}>Click</button>
+            </div>
         })}
         </div>
      );

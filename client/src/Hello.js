@@ -1,7 +1,6 @@
 const Hello = () => {
     return ( 
         <div>Hello
-            <p>yyy</p>
         </div>
      );
 }
