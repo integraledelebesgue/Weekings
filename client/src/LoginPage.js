@@ -3,6 +3,7 @@ import CryptoJS from "crypto-js";
 import axios from "axios";
 import useAuth from './hooks/useAuth';
 import API from "./api";
+import "./styles/login.css";
 
 
 const Login = () => {
