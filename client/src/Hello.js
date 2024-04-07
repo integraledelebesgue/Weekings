@@ -1,7 +1,8 @@
+import Feed from "./Feed";
+
 const Hello = () => {
     return ( 
-        <div>Hello
-        </div>
+        <Feed/>
      );
 }
  

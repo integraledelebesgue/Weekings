@@ -15,10 +15,10 @@ const Navbar = () => {
             <h2 className="logo">Weekings</h2>
             { auth && <div className="middle-links">
                 <NavLink to="/">Main page</NavLink>
-                <NavLink to="/">Friends</NavLink>
+                <NavLink to="/friends">Friends</NavLink>
                 <NavLink to="/groups">Groups</NavLink>
             </div> }
-            {auth && <button onClick={e => {handleLogout()}} className="login-link">Login</button>}
+            {auth && <button onClick={e => {handleLogout()}} className="login-link">Logout</button>}
         </nav>
      );
 }

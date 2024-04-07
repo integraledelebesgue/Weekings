@@ -12,13 +12,16 @@ const Login = () => {
     const {auth, setAuth} = useAuth();
 
     const handleLogin = async (e) => {
+        console.log("halooo");
         e.preventDefault();
         try {
+            console.log("yhy")
             const res = await API.post("/login", {
             username,
             password,
             }).then((res) => {
-            if (res.data === 202) {
+                console.log(res);
+            if (res.status === 202) {
                 setAuth(true);
                 setUsername("");
                 setPassword("");

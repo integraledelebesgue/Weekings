@@ -9,8 +9,8 @@ const Feed = () => {
         <div>
             {error && <h2>Couldn't fetch info</h2>}
             {isPending && <p>loading...</p>} 
-            {posts && groups.map(post => {
-                <div className="group" key={post.id}>
+            {posts && posts.map(post => {
+                <div className="post" key={post.id}>
                     <h3>{post.text}</h3>
                     <button>Click</button>
                 </div>
