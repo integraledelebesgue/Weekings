@@ -2,11 +2,8 @@ import { useState } from "react";
 import CryptoJS from "crypto-js";
 import axios from "axios";
 import useAuth from './hooks/useAuth';
+import API from "./api";
 
-const API = axios.create({
-    baseURL: "https://weeking.shuttleapp.rs",
-    withCredentials: true,
-  });
 
 const Login = () => {
     console.log("login")
