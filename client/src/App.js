@@ -22,11 +22,11 @@ function App() {
         <AuthProvider>
           <Navbar/>
           <Routes>
-            <Route path="/" element={<Hello/>}/>
+            <Route path="/" element={<PrivateRoute element={<Hello/>}/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/groups" element={<PrivateRoute element={<Groups/>}/>}/>
             <Route path="/groups:id" element={<PrivateRoute element={<Group/>}/>}></Route>
-            {/* <Route path="/friends" element={<PrivateRoute element={<Friends/>}/>}></Route> */}
+            <Route path="/friends" element={<PrivateRoute element={<Friends/>}/>}></Route>
           </Routes>
         </AuthProvider>
       </div>

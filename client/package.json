@@ -28,7 +28,6 @@
       "react-app/jest"
     ]
   },
-  "proxy": "https://weeking.shuttleapp.rs",
   "browserslist": {
     "production": [
       ">0.2%",
