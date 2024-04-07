@@ -12,7 +12,6 @@ function App() {
 
   const PrivateRoute = ({ element }) => {
     const { auth } = useAuth();
-    console.log(auth.token);
     return auth ? element : <Navigate to="/login" />;
   };
 
